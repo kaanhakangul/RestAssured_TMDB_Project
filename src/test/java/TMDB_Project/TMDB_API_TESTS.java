@@ -389,7 +389,6 @@ String movieDetailName="Four Rooms";
 
                         .then()
                         .statusCode(401)
-                        .body("status_code",equalTo(3))
                         .extract().path("status_code")
                 ;
         Assert.assertEquals(status_code,3);
