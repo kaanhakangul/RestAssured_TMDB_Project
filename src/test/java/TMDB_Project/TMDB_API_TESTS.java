@@ -22,6 +22,8 @@ public class TMDB_API_TESTS {
 
     int accountID = 0;
 
+    String movieID="5e959bc3db72c00014ad69d6";
+
     @BeforeClass
     public void Setup() {
 
@@ -148,4 +150,166 @@ public class TMDB_API_TESTS {
 
         Assert.assertTrue(ratedMovies.contains("Abigail"), "The movie is not in the rated movie list.");
     }
+
+    @Test (dependsOnMethods = "getRatedMovies")
+    public void getWatchlistMovie(){
+
+        List<String> wathlist=
+        given()
+
+                .spec(reqSpec)
+                .when()
+                .get("/account/" + accountID + "/watchlist/movies")
+
+
+                .then()
+                .statusCode(200)
+                .extract().path("results.original_title")
+                ;
+        System.out.println("wathlist = " + wathlist);
+
+        Assert.assertTrue(wathlist.contains("Dune: Part Two"),"The movie is not in the watchlist.");
+
+    }
+
+    @Test (dependsOnMethods = "getWatchlistMovie")
+    public void getMovieGenres(){
+
+        List<String> genres=
+        given()
+                .spec(reqSpec)
+
+                .when()
+                .get("/genre/movie/list")
+
+
+
+                .then()
+                .statusCode(200)
+                .extract().path("genres.name")
+
+        ;
+        System.out.println("genres = " + genres);
+        Assert.assertTrue(genres.contains("Thriller"),"Can't get genres.");
+    }
+
+    @Test (dependsOnMethods = "getMovieGenres")
+    public void getNowPlayingMovies(){
+
+        given()
+                .spec(reqSpec)
+
+                .when()
+                .get("/movie/now_playing")
+
+
+
+                .then()
+                .statusCode(200)
+
+        ;
+
+    }
+
+    @Test (dependsOnMethods = "getNowPlayingMovies")
+    public void getPopularMovies(){
+
+        given()
+                .spec(reqSpec)
+
+                .when()
+                .get("/movie/popular")
+
+
+
+                .then()
+                .statusCode(200)
+
+        ;
+
+    }
+
+    @Test (dependsOnMethods = "getPopularMovies")
+    public void getTopRatedMovies(){
+
+        given()
+                .spec(reqSpec)
+
+                .when()
+                .get("/movie/top_rated")
+
+
+
+                .then()
+                .statusCode(200)
+
+        ;
+
+    }
+
+
+    @Test (dependsOnMethods = "getTopRatedMovies")
+    public void getUpcomingMovies(){
+
+        given()
+                .spec(reqSpec)
+
+                .when()
+                .get("/movie/upcoming")
+
+
+                .then()
+                .statusCode(200)
+
+        ;
+
+    }
+
+    @Test (dependsOnMethods = "getUpcomingMovies")
+    public void searchForMovies(){
+
+        String movieName="the idea of you";
+
+        String donenSonuc=
+        given()
+                .spec(reqSpec)
+                .param("query",movieName)
+
+                .when()
+                .get("/search/movie")
+
+
+                .then()
+                .statusCode(200)
+                .extract().path("results[0].original_title")
+
+        ;
+
+        System.out.println("donenSonuc = " + donenSonuc);
+        Assert.assertEquals(donenSonuc.toLowerCase(),movieName,"There is no movie like this.");
+    }
+
+    @Test (dependsOnMethods = "searchForMovies")
+    public void getMovieDetails(){
+
+String movieDetailName="Four Rooms";
+
+        String donenMovieName=
+                given()
+                        .spec(reqSpec)
+
+                        .when()
+                        .get("/movie/"+movieID)
+
+
+                        .then()
+                        .statusCode(200)
+                        .extract().path("original_title")
+
+                ;
+
+        System.out.println("donenMovieName = " + donenMovieName);
+        Assert.assertEquals(donenMovieName,movieDetailName,"There is no movie like this.");
+    }
+
 }
