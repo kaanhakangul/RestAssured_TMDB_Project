@@ -312,4 +312,86 @@ String movieDetailName="Four Rooms";
         Assert.assertEquals(donenMovieName,movieDetailName,"There is no movie like this.");
     }
 
+    @Test (dependsOnMethods = "getMovieDetails")
+    public void searchForKeywords(){
+
+        String query="war";
+
+
+                given()
+                        .spec(reqSpec)
+                        .param("query",query)
+                        .when()
+                        .get("https://www.themoviedb.org/search")
+
+
+                        .then()
+                        .statusCode(200)
+
+                ;
+
+    }
+
+    @Test (dependsOnMethods = "searchForKeywords")
+    public void addMovieRating(){
+
+        Map<String, Double> rating = new HashMap<>();
+        rating.put("value", 8.5);
+
+
+        given()
+                .spec(reqSpec)
+                .body(rating)
+                .when()
+                .post("movie/"+movieID+"/rating")
+
+
+                .then()
+                .statusCode(201)
+                .body("success",equalTo(true))
+
+        ;
+
+    }
+    @Test(dependsOnMethods = "addMovieRating")
+    public void deleteMovieRating(){
+
+        given()
+                .spec(reqSpec)
+
+                .when()
+                .delete("/movie/"+movieID+"/rating")
+
+                .then()
+                .statusCode(200)
+        ;
+    }
+
+    @Test(dependsOnMethods = "deleteMovieRating")
+    public void unauthorizedAccess(){
+
+        int mediaID=18;
+        Map<String, Integer> unauth = new HashMap<>();
+        unauth.put("media_id",mediaID);
+
+
+        int status_code=
+                given()
+                        .spec(reqSpec)
+                        .pathParam("listID", "[valid_list_id]")
+                        .queryParam("session_id","[invalid_session_id]")
+                        .body(unauth)
+
+
+                        .when()
+                        .post("/list/"+"{listID}"+"/add_item")
+
+
+                        .then()
+                        .statusCode(401)
+                        .body("status_code",equalTo(3))
+                        .extract().path("status_code")
+                ;
+        Assert.assertEquals(status_code,3);
+    }
 }
